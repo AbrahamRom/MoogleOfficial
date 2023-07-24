@@ -7,9 +7,9 @@ presentacion_pdf="presentacion.pdf"
 
 function clean {
 cd "../informe"
-rm -f *.log *.gz
+rm -f *.log *.gz *.aux *.nav *.snm *.toc
 cd "../presentacion"
-rm -f *.log *.gz
+rm -f *.log *.gz *.aux *.nav *.snm *.toc
 echo "Limpieza realizada"
 }
 
@@ -67,8 +67,8 @@ fi
 case $1 in  
 clean) clean ;;
 run) run ;;
-report) reporte ;;
-slides) slidess ;;
+report) report ;;
+slides) slides ;;
 show_report) show_reporte $2 ;;
 show_slides) show_slidess $2 ;;
 *) echo "invalido" exit 
