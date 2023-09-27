@@ -2,9 +2,9 @@
 using System.IO;
 public static class Moogle
 {
-   // static string ruta = @"C:\Nueva carpeta\moogle-main\moogle-main\Content";
-     static string ruta_ejecucion = Directory.GetCurrentDirectory();
-       static string ruta = ruta_ejecucion + "..\\..\\Content";
+    // static string ruta = @"C:\Nueva carpeta\moogle-main\moogle-main\Content";
+    static string ruta_ejecucion = Directory.GetCurrentDirectory();
+    static string ruta = ruta_ejecucion + "..\\..\\Content"; // la carpeta content es donde se guardan los txt a analizar
     static string[] archivos_txt = Directory.GetFiles(ruta, "*.txt");
     static Diccionario_Referencial Diccionario_R = new Diccionario_Referencial(archivos_txt);
     static Matriz_TF_IDF Matriz = new Matriz_TF_IDF(Diccionario_R, ruta);
@@ -13,7 +13,7 @@ public static class Moogle
         SearchItem[] items;
         Query_class quer = new Query_class(Diccionario_R, query);
         if (Query_class.Busqueda_valida(Diccionario_R, query))
-        {           
+        {
             Dictionary<string, double> Respuesta_query = Matriz.Respuesta_query(quer, Matriz, Diccionario_R);
             items = new SearchItem[Respuesta_query.Count];
             int i = 0;
@@ -30,13 +30,13 @@ public static class Moogle
         return new SearchResult(items, query);
     }
 }
-public class Diccionario_Referencial
+public class Diccionario_Referencial // esta clase servira en la construccion de los demas objetos de todas las otras clases
 {
-    public Dictionary<string, int> Ocurrencia_de_i_en_documentos = new Dictionary<string, int>();
+    public Dictionary<string, int> Ocurrencia_de_i_en_documentos = new Dictionary<string, int>(); // representa por cada termino el espacio de Rn en cuantos documentos aparece dicho termino
     public int Cant_arch;
     public Dictionary<string, int> Indexador_Columnas = new Dictionary<string, int>();
     public Dictionary<string, int> Cant_pal_DOC = new Dictionary<string, int>();
-    public Dictionary<string, int> Indexador_Fila = new Dictionary<string, int>();
+    public Dictionary<string, int> Indexador_Fila = new Dictionary<string, int>(); // Los Diccionarios indexadores se utilizan para indexar respecto a un termino en la posicion del array correspondiente
     public Diccionario_Referencial(string[] archivos_txt)
     {
         int contador_indexador_columna = 0;
@@ -67,7 +67,7 @@ public class Diccionario_Referencial
         this.Cant_arch = archivos_txt.Length;
     }
     //FAlta constructor con deserializar json
-    public static string[] Tokenizar_txt(string ruta_de_archivo)
+    public static string[] Tokenizar_txt(string ruta_de_archivo) // tokenizar es separar cada string de texto en un array de string que represente cada termino
     {
         string Contenido_Archivo = File.ReadAllText(ruta_de_archivo);
         string Documento_miniscula = Contenido_Archivo.ToLower();
@@ -83,7 +83,7 @@ public class Diccionario_Referencial
         return documento_tokenizado;
     }
 }
-public class Vector
+public class Vector // eata clase es una representacion del documento como vector ndimensional
 {
     public double[] Vector_TF_IDF;
     public Vector(Diccionario_Referencial DIC_REF, string archivo)
@@ -107,7 +107,7 @@ public class Vector
     {
         this.Vector_TF_IDF = Consulta_query;
     }
-    public static double Calculo_TF_IDF(int Freq_i_en_j, int cant_palabras_en_j, int Num_Archivos, double Num_arch_con_i)
+    public static double Calculo_TF_IDF(int Freq_i_en_j, int cant_palabras_en_j, int Num_Archivos, double Num_arch_con_i) //el TF-IDF denota la relevancia de uuna palabra en el espacio de todos los documentos, en el informe se explica como se calcula
     {
         double TF = (Math.Log10(Freq_i_en_j + 1)) / (Math.Log10(cant_palabras_en_j + 000.1));
         double IDF = Math.Log10(1 + (Num_Archivos / (Num_arch_con_i + 1)));
@@ -126,12 +126,12 @@ public class Vector
     {
         return Math.Sqrt(this.Multiplicar_por_Vector(this));
     }
-    public double Cosigno(Vector x)
+    public double Cosigno(Vector x) // el valor que retorna este metodo denota cuan parecido son dos vectores, o sea dicho valor fluctua entre 0 y 1, mientras mas cercano a 1, mas se pareceran, y mientras mas cercano a 0, menos
     {
         return (this.Multiplicar_por_Vector(x)) / (this.Norma() * x.Norma());
     }
 }
-public class Matriz_TF_IDF
+public class Matriz_TF_IDF // esta clase es la representacion de la matriz donde cada fila es un vector(o documento) y cada columna una dimension (o termino), al hacerla estatica permite guardar dicha matriz mientras se ejecute el programa sin tener nuevamente que construirla
 {
     Vector[] Matriz;
     public Matriz_TF_IDF(Diccionario_Referencial DIC_REF, string Carpeta_Documentos)
@@ -180,7 +180,7 @@ public class Matriz_TF_IDF
         return menor.Key;
     }
 }
-public class Query_class
+public class Query_class // esta clase se usa para procesar en query como otro vector,entre otros procesos, debido a sus particularidades es menos visible si se construye dentro de la misma clase Vector
 {
     public double[] query_TF_IDF;
     public Vector Vector_Query;
@@ -207,7 +207,7 @@ public class Query_class
         this.query_original = query_tokenizado;
         this.Vector_Query = new Vector(query_TF_IDF);
     }
-    public string Snippet(string Documento, Diccionario_Referencial DicREF)
+    public string Snippet(string Documento, Diccionario_Referencial DicREF) // es el texto que representara al documento y el texto q lee para entender de que va dicho documento
     {
         string[] DOC = Diccionario_Referencial.Tokenizar_txt(Documento);
         int count = 0;
@@ -280,7 +280,7 @@ public class Query_class
             }
         }
     }
-    public string Vecindad_Pal(string[] Doc, int i)
+    public string Vecindad_Pal(string[] Doc, int i) // vecindad es una definicion que me permite definir dentro del texto una numero de palabras antes y un numero de palabras despues del termino relevante que se le pasa
     {
         string Vecindad = "";
         if (i >= 3 && i < Doc.Length - 3)
@@ -305,7 +305,7 @@ public class Query_class
         }
         else return Doc[i];
     }
-    public string Vecindad_Pal(string[] Doc, int i, int i2)
+    public string Vecindad_Pal(string[] Doc, int i, int i2)// este en vez de recibir una palabra(o su posicion), recibe dos y devuelve la vecindad comun de ambas
     {
         string Vecindad = "";
         if (i >= 3 && i2 < Doc.Length - 3)
@@ -330,7 +330,7 @@ public class Query_class
         }
         else return Doc[i];
     }
-    public int[] PosMasCercana(List<int> a, List<int> b)
+    public int[] PosMasCercana(List<int> a, List<int> b) // busca dentro de las palabras mas relevantes, si hay mas de 1, cuales de estas estan lo mas cercanas posibles, haciendo que el Snipet sea mas certero
     {
         int[] resultado = new int[2];
         int minMOd = int.MaxValue;
@@ -355,7 +355,7 @@ public class Query_class
         }
         return resultado;
     }
-    public static bool Busqueda_valida(Diccionario_Referencial dic, string query)
+    public static bool Busqueda_valida(Diccionario_Referencial dic, string query) // define una busqueda de query valida, o sea, si ninguna palabra en el query esta en el n-espacio se efectua la busqueda
     {
         foreach (string palabra in Diccionario_Referencial.Tokenizar_txt(query, false))
         {
@@ -363,7 +363,7 @@ public class Query_class
         }
         return false;
     }
-    public static int LevensteinsDistance(string word1, string word2)
+    public static int LevensteinsDistance(string word1, string word2) // representa la cantidad minima de operaciones que deben hacerse para transformar un string en otro, es usado para la sugerencia
     {
         int[,] Matriz = new int[word1.Length + 1, word2.Length + 1];
         for (int i = 0; i <= word1.Length; i++)
@@ -384,7 +384,7 @@ public class Query_class
         }
         return Matriz[word1.Length, word2.Length];
     }
-    public static string MostSimilarWord(string Word, Diccionario_Referencial Dic_Ref)
+    public static string MostSimilarWord(string Word, Diccionario_Referencial Dic_Ref) // usando LevensteinDistance se busca la palabra del n-espacio que sea mas parecida a aquella palabra invalida que se le paso
     {
         string MostSimilarWord = ""; int Distance = int.MaxValue;
         foreach (var x in Dic_Ref.Indexador_Columnas)
@@ -395,14 +395,14 @@ public class Query_class
         }
         return MostSimilarWord;
     }
-    public string Suggestion(Diccionario_Referencial Dic_Ref)
+    public string Suggestion(Diccionario_Referencial Dic_Ref) // va palabra por palabra del query y si no existe en el n-espacio, se busca la mas parecida de las que existen
     {
         for (int i = 0; i < this.query_original.Length; i++)
         {
             if (!Dic_Ref.Indexador_Columnas.ContainsKey(this.query_original[i])) { query_original[i] = MostSimilarWord(query_original[i], Dic_Ref); }
         }
         string sugerencia = "";
-        for (int i = 0;i < this.query_original.Length; i++)
+        for (int i = 0; i < this.query_original.Length; i++)
         {
             sugerencia += query_original[i] + " ";
         }
